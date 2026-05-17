@@ -1,0 +1,93 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.18'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.paralleliq'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// ── Repositories ──────────────────────────────────────────────────
+// NOTE: When the enterprise Gradle template is applied, replace this
+// section with the internal Artifactory/Nexus repository config.
+repositories {
+    mavenLocal()          // picks up paralleliq-common installed via: cd paralleliq-common && mvn install
+    mavenCentral()
+}
+
+// ── Dependencies ──────────────────────────────────────────────────
+dependencies {
+
+    // paralleliq-common — build this first: cd paralleliq-common && mvn install
+    implementation 'com.paralleliq:paralleliq-common:1.0.0-SNAPSHOT'
+
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // SQL Server JDBC
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre8'
+
+    // API docs
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly    'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly    'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // MapStruct
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // Lombok
+    compileOnly    'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+    // Metrics
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // Scheduling lock (multi-instance safe)
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:4.44.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.44.0'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+// ── Build config ──────────────────────────────────────────────────
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// ── PCF manifest helper task ──────────────────────────────────────
+// NOTE: Replace this with your enterprise PCF deployment template.
+// The task below is a placeholder — your team's Gradle template will
+// provide the actual cf push / manifest generation tasks.
+task generateManifest {
+    doLast {
+        println "TODO: Replace with enterprise PCF Gradle template task"
+    }
+}
+
+// ── Build info for actuator /info endpoint ────────────────────────
+springBoot {
+    buildInfo()
+}

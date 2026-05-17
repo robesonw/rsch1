@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+    </parent>
+
+    <groupId>com.paralleliq</groupId>
+    <artifactId>paralleliq-agent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>ParallelIQ Agent</name>
+    <description>
+        Execution agent — runs on Windows Server via Task Scheduler.
+        Polls the API for queued runs, executes capture/transform/replay/compare,
+        posts results back to API. Handles all certificate-heavy connector operations.
+    </description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lombok.version>1.18.30</lombok.version>
+    </properties>
+
+    <dependencies>
+        <!-- Shared domain models and DTOs -->
+        <dependency>
+            <groupId>com.paralleliq</groupId>
+            <artifactId>paralleliq-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Spring Boot — minimal web layer (REST client only, no server needed) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- Only included for RestTemplate — the agent does not serve HTTP requests -->
+        </dependency>
+
+        <!-- ── CONNECTORS ───────────────────────────────────────── -->
+
+        <!-- IBM MQ -->
+        <dependency>
+            <groupId>com.ibm.mq</groupId>
+            <artifactId>mq-jms-spring-boot-starter</artifactId>
+            <version>2.7.7</version>
+        </dependency>
+
+        <!-- Apache Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <!-- Solace PubSub+ (JCSMP) -->
+        <dependency>
+            <groupId>com.solacesystems</groupId>
+            <artifactId>sol-jcsmp</artifactId>
+            <version>10.23.0</version>
+        </dependency>
+
+        <!-- SFTP via Apache Commons VFS2 + JSch -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
+
+        <!-- ── DATA FORMATS ─────────────────────────────────────── -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- SQL Server JDBC (for DB connector) -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>12.4.2.jre8</version>
+        </dependency>
+
+        <!-- Resilience4j — retry + circuit breaker on connector calls -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Builds an executable fat JAR: java -jar paralleliq-agent.jar -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <!-- Makes the JAR directly executable on Windows: paralleliq-agent.jar -->
+                    <executable>true</executable>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
